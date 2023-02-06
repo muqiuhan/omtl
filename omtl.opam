@@ -12,7 +12,6 @@ bug-reports: "https://github.com/muqiuhan/omtl/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.0"}
-  "unix"
   "odoc" {with-doc}
 ]
 build: [
