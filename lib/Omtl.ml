@@ -23,7 +23,8 @@ let backtraces () : string =
     match lst with
     | [] -> []
     | x :: xs ->
-      ("\027[35m| " ^ x ^ "\027[0m") :: (List.map (( ^ ) "                   | ")) xs
+      ("\027[33m| " ^ x ^ "\027[0m")
+      :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
   in
   Printexc.get_raw_backtrace ()
   |> Printexc.raw_backtrace_to_string
@@ -46,7 +47,8 @@ let callstack () : string =
     match lst with
     | [] -> []
     | x :: xs ->
-      ("\027[35m| " ^ x ^ "\027[0m") :: (List.map (( ^ ) "                   | ")) xs
+      ("\027[33m| " ^ x ^ "\027[0m")
+      :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
   in
   Printexc.get_callstack 20
   |> Printexc.raw_backtrace_to_string
@@ -82,9 +84,9 @@ let test_case (test_case : 'a test_case) : string =
     Format.sprintf
       "   \027[31mo\027[0m- %s...\027[31mFAIL\027[0m \027[38m(0s)\027[0m\n\
       \        \027[31m|!| %s\027[0m\n\
-      \        \027[35mBACKTRACES\027[0m %s\n\
+      \        \027[4;36mBACKTRACES\027[0m %s\n\
       \                   |\n\
-      \        \027[35mCALLSTACKS\027[0m %s"
+      \        \027[4;36mCALLSTACKS\027[0m %s"
       name
       i
       b
@@ -93,7 +95,7 @@ let test_case (test_case : 'a test_case) : string =
 
 let test_suit (test_suit : 'a test_suit) : unit =
   let name, test_case_list = test_suit in
-  Format.sprintf "\027[35m|-\027[0m \027[38mTest suit for\027[0m \027[34m%s\027[0m" name
+  Format.sprintf "\027[35m|-\027[0m \027[38mTest suit for\027[0m \027[1;34m%s\027[0m" name
   |> print_endline;
   List.iter (fun case -> test_case case |> print_endline) test_case_list
 ;;
