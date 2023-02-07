@@ -48,7 +48,7 @@ module Backtraces = struct
     Printexc.get_raw_backtrace ()
     |> Printexc.raw_backtrace_to_string
     |> String.split_on_char '\n'
-    |> List.filter (fun s -> String.starts_with ~prefix:"Called from Omtl.time" s)
+    |> List.filter (fun s -> not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
     |> decorate
     |> String.concat "\n"
   ;;
@@ -122,7 +122,7 @@ let test_case (test_case : 'a test_case) : string =
       "   \027[31mo\027[0m- %s...\027[31mFAIL\027[0m \027[38m(0s)\027[0m\n\
       \        \027[31m|!| %s\027[0m\n\
       \        \027[4;36mBACKTRACES\027[0m %s\n\
-      \                   |\n\
+      \                   \027[37m|\027[0m\n\
       \        \027[4;36mCALLSTACKS\027[0m %s"
       name
       i
