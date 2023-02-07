@@ -26,15 +26,19 @@ let test_str_concat () =
   else fail "My_String.str_concat [\"foo\"; \"bar\"] = \"foobar\""
 ;;
 
+let test_failure () = fail "Take it easy, this is just an example of a failed test"
+let test_undefined_exception () = raise Not_found
+let test_function_running_time () = Unix.sleep 1
+
 (* Run it *)
 let _ =
   "My_String"
   +:> [ "lowercase" >== test_lowercase
       ; "capitalize" >== test_capitalize
       ; "str_concat" >== test_str_concat
-      ; ("Examples of test failures"
-        >== fun () -> fail "Take it easy, this is just an example of a failed test")
-      ; ("Test function running time" >== fun () -> Unix.sleep 1)
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
       ]
   |> run
 ;;

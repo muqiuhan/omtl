@@ -11,6 +11,14 @@ let ( >== ) (name : string) (f : 'a) : 'a test_case = name, f
 (** Wrapper function to failwith *)
 let fail = failwith
 
+(** Print detailed error message *)
+let backtraces (backtraces : Printexc.raw_backtrace) : string =
+  Printexc.raw_backtrace_to_string backtraces
+  |> String.split_on_char '\n'
+  |> List.map (( ^ ) "\t")
+  |> String.concat "\n"
+;;
+
 (** Returns the time the [f] took to run and the [f] execution result.
     ['a] is [f] signature
     ['b] is [f] result *)
@@ -21,6 +29,7 @@ let time (f : 'a) : float * 'b =
     Unix.gettimeofday () -. timer, Ok result
   with
   | Failure s -> timer, Fail s
+  | _ -> fail ""
 ;;
 
 let test_case (test_case : 'a test_case) : string =
