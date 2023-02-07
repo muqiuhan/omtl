@@ -4,8 +4,22 @@
 
 __OCaml Minimalist Testing Library__
 
-<img src=".github/demo.png">
 
+![](https://github.com/muqiuhan/omtl/workflows/Linux/badge.svg)
+![](https://github.com/muqiuhan/omtl/workflows/Windows/badge.svg)
+![](https://github.com/muqiuhan/omtl/workflows/MacOS/badge.svg)
+
+minimum version
+
+![](https://github.com/muqiuhan/omtl/workflows/4.13.x/badge.svg)
+
+
+<img src=".github/demo.png">
+  
+---
+
+This is not a comprehensive test framework, just a library, about a hundred lines in size, containing only a few functions. The purpose is to provide an intuitive command line interface and write simple tests quickly.
+  
 </div>
 
 ## Usage
