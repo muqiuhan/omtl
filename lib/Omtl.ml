@@ -48,7 +48,9 @@ module Backtraces = struct
     Printexc.get_raw_backtrace ()
     |> Printexc.raw_backtrace_to_string
     |> String.split_on_char '\n'
-    |> List.filter (fun s -> not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
+    |> List.filter (fun s ->
+         (not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
+         && not (String.equal s ""))
     |> decorate
     |> String.concat "\n"
   ;;
@@ -106,7 +108,7 @@ let test (f : 'a) : Test_Result.t =
     Ok (time f)
   with
   | Failure s -> Fail (s, Backtraces.get (), Callstack.get ())
-  | _ -> Fail ("No more information", Backtraces.get (), Callstack.get ())
+  | e -> Fail ("Exception: " ^ Printexc.to_string e, Backtraces.get (), Callstack.get ())
 ;;
 
 let test_case (test_case : 'a test_case) : string =
