@@ -40,7 +40,7 @@ let callstack () : string =
       | [] -> []
       | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
     in
-    loop lst 2
+    loop (loop lst 2 |> List.rev) 1
   in
   let decorate (lst : string list) : string list =
     match lst with
@@ -78,14 +78,17 @@ let test_case (test_case : 'a test_case) : string =
       "   \027[32mo\027[0m- %s...\027[32mOK\027[0m \027[38m(%fs)\027[0m"
       name
       time
-  | Fail (i, b, _) ->
+  | Fail (i, b, c) ->
     Format.sprintf
       "   \027[31mo\027[0m- %s...\027[31mFAIL\027[0m \027[38m(0s)\027[0m\n\
       \        \027[31m|!| %s\027[0m\n\
-      \        \027[35mBACKTRACES\027[0m %s"
+      \        \027[35mBACKTRACES\027[0m %s\n\
+      \                   |\n\
+      \        \027[35mCALLSTACKS\027[0m %s"
       name
       i
       b
+      c
 ;;
 
 let test_suit (test_suit : 'a test_suit) : unit =
