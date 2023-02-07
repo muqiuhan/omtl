@@ -20,7 +20,10 @@
  (name omtl)
  (synopsis "OCaml Minimalist Testing Library")
  (description "OCaml Minimalist Testing Library")
- (depends ocaml dune)
+ (depends
+  (ocaml
+   (>= 4.13))
+  dune)
  (tags
   (testing "test framework")))
 

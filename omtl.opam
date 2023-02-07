@@ -10,7 +10,7 @@ homepage: "https://github.com/muqiuhan/omtl"
 doc: "https://github.com/omtl"
 bug-reports: "https://github.com/muqiuhan/omtl/issues"
 depends: [
-  "ocaml"
+  "ocaml" {>= "4.13"}
   "dune" {>= "3.0"}
   "odoc" {with-doc}
 ]
