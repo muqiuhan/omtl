@@ -22,13 +22,8 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-type 'a test_result =
-  | Ok of 'a
-  | Fail of info * backtraces * callstack
-
-and info = string
-and backtraces = string
-and callstack = string
+(** start record backtrace *)
+let _ = Printexc.record_backtrace true
 
 type 'a test_suit = string * 'a test_case list
 and 'a test_case = string * 'a
@@ -36,70 +31,88 @@ and 'a test_case = string * 'a
 let ( +:> ) (name : string) (test_case_list : 'a test_case list) = name, test_case_list
 let ( >== ) (name : string) (f : 'a) : 'a test_case = name, f
 
-(** start record backtrace *)
-let _ = Printexc.record_backtrace true
-
 (** Wrapper function to failwith *)
 let fail = failwith
 
-let backtraces () : string =
-  let decorate (lst : string list) : string list =
-    match lst with
-    | [] -> []
-    | x :: xs ->
-      ("\027[33m| " ^ x ^ "\027[0m")
-      :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
-  in
-  Printexc.get_raw_backtrace ()
-  |> Printexc.raw_backtrace_to_string
-  |> String.split_on_char '\n'
-  |> List.filter (fun s -> String.starts_with ~prefix:"Called from Omtl.time" s)
-  |> decorate
-  |> String.concat "\n"
-;;
+module Backtraces = struct
+  type t = string
 
-let callstack () : string =
-  let filter (lst : string list) : string list =
-    let rec loop (lst : string list) (index : int) : string list =
+  let get () : t =
+    let decorate (lst : t list) : t list =
       match lst with
       | [] -> []
-      | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
+      | x :: xs ->
+        ("\027[33m| " ^ x ^ "\027[0m")
+        :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
     in
-    loop (loop lst 2 |> List.rev) 1
-  in
-  let decorate (lst : string list) : string list =
-    match lst with
-    | [] -> []
-    | x :: xs ->
-      ("\027[33m| " ^ x ^ "\027[0m")
-      :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
-  in
-  Printexc.get_callstack 20
-  |> Printexc.raw_backtrace_to_string
-  |> String.split_on_char '\n'
-  |> filter
-  |> decorate
-  |> String.concat "\n"
-;;
+    Printexc.get_raw_backtrace ()
+    |> Printexc.raw_backtrace_to_string
+    |> String.split_on_char '\n'
+    |> List.filter (fun s -> String.starts_with ~prefix:"Called from Omtl.time" s)
+    |> decorate
+    |> String.concat "\n"
+  ;;
+end
+
+module Callstack = struct
+  type t = string
+
+  let get () : t =
+    let filter (lst : t list) : t list =
+      let rec loop (lst : t list) (index : int) : t list =
+        match lst with
+        | [] -> []
+        | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
+      in
+      loop (loop lst 2 |> List.rev) 1
+    in
+    let decorate (lst : t list) : t list =
+      match lst with
+      | [] -> []
+      | x :: xs ->
+        ("\027[33m| " ^ x ^ "\027[0m")
+        :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
+    in
+    Printexc.get_callstack 20
+    |> Printexc.raw_backtrace_to_string
+    |> String.split_on_char '\n'
+    |> filter
+    |> decorate
+    |> String.concat "\n"
+  ;;
+end
+
+module Test_Result = struct
+  type t =
+    | Ok of time
+    | Fail of info * backtraces * callstack
+
+  and time = float
+  and info = string
+  and callstack = Callstack.t
+  and backtraces = Backtraces.t
+end
 
 (** Returns the time the [f] took to run and the [f] execution result.
     ['a] is [f] signature
     ['b] is [f] result *)
-let time (f : 'a) : float * 'b =
-  let timer : float = Unix.gettimeofday () in
+let test (f : 'a) : Test_Result.t =
   try
-    let result = f () in
-    Unix.gettimeofday () -. timer, Ok result
+    let time (f : 'a) : float =
+      let timer : float = Unix.gettimeofday () in
+      f ();
+      Unix.gettimeofday () -. timer
+    in
+    Ok (time f)
   with
-  | Failure s -> timer, Fail (s, backtraces (), callstack ())
-  | _ -> timer, Fail ("No more information", backtraces (), callstack ())
+  | Failure s -> Fail (s, Backtraces.get (), Callstack.get ())
+  | _ -> Fail ("No more information", Backtraces.get (), Callstack.get ())
 ;;
 
 let test_case (test_case : 'a test_case) : string =
   let name, f = test_case in
-  let time, result = time f in
-  match result with
-  | Ok _ ->
+  match test f with
+  | Ok time ->
     Format.sprintf
       "   \027[32mo\027[0m- %s...\027[32mOK\027[0m \027[38m(%fs)\027[0m"
       name
