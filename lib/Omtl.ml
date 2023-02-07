@@ -23,10 +23,19 @@ let backtraces () : string =
 ;;
 
 let callstack () : string =
+  let filter (lst : string list) : string list =
+    let rec loop (lst : string list) (index : int) : string list =
+      match lst with
+      | [] -> []
+      | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
+    in
+    loop lst 2
+  in
   let callstack : string =
     Printexc.get_callstack 20
     |> Printexc.raw_backtrace_to_string
     |> String.split_on_char '\n'
+    |> filter
     |> List.map (( ^ ) "\t")
     |> String.concat "\n"
   in
