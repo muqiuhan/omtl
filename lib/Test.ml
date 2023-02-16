@@ -93,11 +93,14 @@ let test_case
         (if backtrace
         then
           Format.sprintf
-            "        \027[4;36mBACKTRACES\027[0m %s\n                   \027[37m\027[0m\n"
-            b
+            "        \027[4;36mBACKTRACES\027[0m %s\n"
+            (if String.length b = 0 then "No more info" else b)
         else "")
         (if callstack
-        then Format.sprintf "        \027[4;36mCALLSTACKS\027[0m %s\n" c
+        then
+          Format.sprintf
+            "        \027[4;36mCALLSTACKS\027[0m %s"
+            (if String.length c = 0 then "No more info" else c)
         else "")
     else
       Format.sprintf
@@ -105,9 +108,17 @@ let test_case
         name
         i
         (if backtrace
-        then Format.sprintf "        BACKTRACES %s\n                   \n" b
+        then
+          Format.sprintf
+            "        BACKTRACES %s\n"
+            (if String.length b = 0 then "No more info" else b)
         else "")
-        (if callstack then Format.sprintf "        CALLSTACKS %s\n" c else "")
+        (if callstack
+        then
+          Format.sprintf
+            "        CALLSTACKS %s"
+            (if String.length c = 0 then "No more info" else c)
+        else "")
 ;;
 
 let test_suit
