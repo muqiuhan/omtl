@@ -24,19 +24,8 @@
 
 open Info
 
-(** start record backtrace *)
-let _ = Printexc.record_backtrace true
-
 type 'a test_suit = string * 'a test_case list
 and 'a test_case = string * 'a
-
-(** Assist in building test sets and individual test items to improve the readability of test code *)
-let ( +:> ) (name : string) (test_case_list : 'a test_case list) = name, test_case_list
-
-let ( >== ) (name : string) (f : 'a) : 'a test_case = name, f
-
-(** Wrapper function to failwith *)
-let fail = failwith
 
 module Test_Result = struct
   type t =
@@ -68,12 +57,12 @@ let test (f : 'a) : Test_Result.t =
 let test_case (test_case : 'a test_case) : string =
   let name, f = test_case in
   match test f with
-  | Ok time ->
+  | Test_Result.Ok time ->
     Format.sprintf
       "   \027[32mo\027[0m- %s...\027[32mOK\027[0m \027[38m(%fs)\027[0m"
       name
       time
-  | Fail (i, b, c) ->
+  | Test_Result.Fail (i, b, c) ->
     Format.sprintf
       "   \027[31mo\027[0m- %s...\027[31mFAIL\027[0m \027[38m(0s)\027[0m\n\
       \        \027[31m|!| %s\027[0m\n\
@@ -92,5 +81,8 @@ let test_suit (test_suit : 'a test_suit) : unit =
   |> print_endline;
   List.iter (fun case -> test_case case |> print_endline) test_case_list
 ;;
+
+(** start record backtrace *)
+let _ = Printexc.record_backtrace true
 
 let run = test_suit

@@ -22,13 +22,19 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
+module type Info_Impl = sig
+  val get_info : unit -> string
+  val filter : string list -> string list
+  val decorate : string list -> string list
+end
+
+module type Info_API = sig
+  val get : unit -> string
+end
+
 module Info_Generator =
 functor
-  (M : sig
-     val get_info : unit -> string
-     val filter : string list -> string list
-     val decorate : string list -> string list
-   end)
+  (M : Info_Impl)
   ->
   struct
     let get () : string =
@@ -40,41 +46,90 @@ functor
     ;;
   end
 
-module type Info = sig
-  val get : unit -> string
-end
-
-module Backtrace : Info = Info_Generator (struct
-  let decorate (lst : string list) : string list =
-    match lst with
-    | [] -> []
-    | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
-  ;;
-
-  let filter =
-    List.filter (fun s ->
-      (not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
-      && not (String.equal s ""))
-  ;;
-
-  let get_info () = Printexc.get_raw_backtrace () |> Printexc.raw_backtrace_to_string
-end)
-
-module CallStack : Info = Info_Generator (struct
-  let filter (lst : string list) : string list =
-    let rec loop (lst : string list) (index : int) : string list =
+module Backtrace : Info_API = Info_Generator ((
+  struct
+    let decorate (lst : string list) : string list =
       match lst with
       | [] -> []
-      | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
-    in
-    loop (loop lst 2 |> List.rev) 1
-  ;;
+      | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
+    ;;
 
-  let decorate (lst : string list) : string list =
-    match lst with
-    | [] -> []
-    | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
-  ;;
+    (** Filter the backtrace related to the library itself *)
+    let filter =
+      List.filter (fun s ->
+        (not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
+        && not (String.equal s ""))
+    ;;
 
-  let get_info () = Printexc.get_callstack 20 |> Printexc.raw_backtrace_to_string
-end)
+    let get_info () = Printexc.get_raw_backtrace () |> Printexc.raw_backtrace_to_string
+  end :
+    Info_Impl))
+
+module CallStack : Info_API = Info_Generator ((
+  struct
+    (** Filter the first two CallStack information, because the first two are related to the library itself *)
+    let filter (lst : string list) : string list =
+      let rec loop (lst : string list) (index : int) : string list =
+        match lst with
+        | [] -> []
+        | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
+      in
+      loop (loop lst 2 |> List.rev) 1
+    ;;
+
+    let decorate (lst : string list) : string list =
+      match lst with
+      | [] -> []
+      | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
+    ;;
+
+    let get_info () = Printexc.get_callstack 20 |> Printexc.raw_backtrace_to_string
+  end :
+    Info_Impl))
+
+module Color = struct
+  module Backtrace : Info_API = Info_Generator ((
+    struct
+      let decorate (lst : string list) : string list =
+        match lst with
+        | [] -> []
+        | x :: xs ->
+          ("\027[33m| " ^ x ^ "\027[0m")
+          :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
+      ;;
+
+      (** Filter the backtrace related to the library itself *)
+      let filter =
+        List.filter (fun s ->
+          (not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
+          && not (String.equal s ""))
+      ;;
+
+      let get_info () = Printexc.get_raw_backtrace () |> Printexc.raw_backtrace_to_string
+    end :
+      Info_Impl))
+
+  module CallStack : Info_API = Info_Generator ((
+    struct
+      (** Filter the first two CallStack information, because the first two are related to the library itself *)
+      let filter (lst : string list) : string list =
+        let rec loop (lst : string list) (index : int) : string list =
+          match lst with
+          | [] -> []
+          | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
+        in
+        loop (loop lst 2 |> List.rev) 1
+      ;;
+
+      let decorate (lst : string list) : string list =
+        match lst with
+        | [] -> []
+        | x :: xs ->
+          ("\027[33m| " ^ x ^ "\027[0m")
+          :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
+      ;;
+
+      let get_info () = Printexc.get_callstack 20 |> Printexc.raw_backtrace_to_string
+    end :
+      Info_Impl))
+end

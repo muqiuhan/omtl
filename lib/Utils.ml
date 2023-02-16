@@ -22,48 +22,12 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-open Omtl.Utils
+open Test
 
-(* A module with functions to test *)
-module My_String = struct
-  let equal = String.equal
-  let capitalize = String.capitalize_ascii
-  let str_concat = String.concat ""
-end
+(** Assist in building test sets and individual test items to improve the readability of test code *)
+let ( +:> ) (name : string) (test_case_list : 'a test_case list) = name, test_case_list
 
-(* The tests *)
-let test_equal () =
-  if My_String.equal "hello!" "hello!"
-  then ()
-  else fail "My_String.equal \"hello!\" = \"hello!\""
-;;
+let ( >== ) (name : string) (f : 'a) : 'a test_case = name, f
 
-let test_capitalize () =
-  if String.equal "HELLO!" (My_String.capitalize "hELLO!")
-  then ()
-  else fail "My_String.capitalize \"hELLO!\" = \"HELLO!!\""
-;;
-
-let test_str_concat () =
-  if String.equal "foobar" (My_String.str_concat [ "foo"; "bar" ])
-  then ()
-  else fail "My_String.str_concat [\"foo\"; \"bar\"] = \"foobar\""
-;;
-
-let test_failure () = fail "Take it easy, this is just an example of a failed test"
-let test_undefined_exception () = raise Not_found
-let test_function_running_time () = Unix.sleep 1
-
-(* Run it *)
-let _ =
-  let open Omtl.Test in
-  "My_String"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run
-;;
+(** Wrapper function to failwith *)
+let fail = failwith
