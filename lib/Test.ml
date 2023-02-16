@@ -97,7 +97,7 @@ let test_case
             b
         else "")
         (if callstack
-        then Format.sprintf "                \027[4;36mCALLSTACKS\027[0m %s\n" c
+        then Format.sprintf "        \027[4;36mCALLSTACKS\027[0m %s\n" c
         else "")
     else
       Format.sprintf
@@ -107,7 +107,7 @@ let test_case
         (if backtrace
         then Format.sprintf "        BACKTRACES %s\n                   \n" b
         else "")
-        (if callstack then Format.sprintf "                CALLSTACKS %s\n" c else "")
+        (if callstack then Format.sprintf "        CALLSTACKS %s\n" c else "")
 ;;
 
 let test_suit
