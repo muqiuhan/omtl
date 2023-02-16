@@ -28,7 +28,9 @@ let _ = Printexc.record_backtrace true
 type 'a test_suit = string * 'a test_case list
 and 'a test_case = string * 'a
 
+(** Assist in building test sets and individual test items to improve the readability of test code *)
 let ( +:> ) (name : string) (test_case_list : 'a test_case list) = name, test_case_list
+
 let ( >== ) (name : string) (f : 'a) : 'a test_case = name, f
 
 (** Wrapper function to failwith *)
