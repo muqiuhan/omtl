@@ -120,7 +120,6 @@ let _ =
   |> run ~color:true
 ;;
 
-
 let _ =
   let open Omtl.Test in
   "My_String with color, backtrace (without callstack)"
@@ -147,7 +146,6 @@ let _ =
   |> run ~color:true ~callstack:true
 ;;
 
-
 let _ =
   let open Omtl.Test in
   "My_String withall"
@@ -160,4 +158,3 @@ let _ =
       ]
   |> run ~color:true ~backtrace:true ~callstack:true
 ;;
-
