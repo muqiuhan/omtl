@@ -57,7 +57,7 @@ let test_function_running_time () = Unix.sleep 1
 (* Run it *)
 let _ =
   let open Omtl.Test in
-  "My_String"
+  "My_String (without all)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
       ; "str_concat" >== test_str_concat
@@ -67,3 +67,84 @@ let _ =
       ]
   |> run
 ;;
+
+let _ =
+  let open Omtl.Test in
+  "My_String with backtrace (without color, callstack)"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~backtrace:true
+;;
+
+let _ =
+  let open Omtl.Test in
+  "My_String with callstack (without color, backtrace)"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~callstack:true
+;;
+
+let _ =
+  let open Omtl.Test in
+  "My_String with color (without backtrace, callstack)"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~color:true
+;;
+
+
+let _ =
+  let open Omtl.Test in
+  "My_String with color, backtrace (without callstack)"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~color:true ~backtrace:true
+;;
+
+let _ =
+  let open Omtl.Test in
+  "My_String with color, callstack (without backtrace)"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~color:true ~callstack:true
+;;
+
+
+let _ =
+  let open Omtl.Test in
+  "My_String withall"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~color:true ~backtrace:true ~callstack:true
+;;
+

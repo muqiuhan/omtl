@@ -24,8 +24,8 @@
 
 open Info
 
-type 'a test_suit = string * 'a test_case list
-and 'a test_case = string * 'a
+type test_suit = string * test_case list
+and test_case = string * (unit -> unit)
 
 module Test_Result = struct
   type t =
@@ -38,51 +38,100 @@ module Test_Result = struct
   and backtraces = string
 end
 
-(** Returns the time the [f] took to run and the [f] execution result.
-    ['a] is [f] signature
-    ['b] is [f] result *)
-let test (f : 'a) : Test_Result.t =
+let test
+  ?(backtrace : bool = false)
+  ?(callstack : bool = false)
+  ?(color : bool = false)
+  (f : unit -> unit)
+  : Test_Result.t
+  =
   try
-    let time (f : 'a) : float =
+    let time (f : unit -> unit) : float =
       let timer : float = Unix.gettimeofday () in
       f ();
       Unix.gettimeofday () -. timer
     in
     Ok (time f)
   with
-  | Failure s -> Fail (s, Backtrace.get (), CallStack.get ())
-  | e -> Fail ("Exception: " ^ Printexc.to_string e, Backtrace.get (), CallStack.get ())
+  | Failure s ->
+    let backtrace =
+      if backtrace then if color then Color.Backtrace.get () else Backtrace.get () else ""
+    in
+    let callstack =
+      if callstack then if color then Color.CallStack.get () else CallStack.get () else ""
+    in
+    Fail (s, backtrace, callstack)
+  | e -> Fail ("Exception: " ^ Printexc.to_string e, "", "")
 ;;
 
-let test_case (test_case : 'a test_case) : string =
+let test_case
+  ?(backtrace : bool = false)
+  ?(callstack : bool = false)
+  ?(color : bool = false)
+  (test_case : test_case)
+  : string
+  =
   let name, f = test_case in
-  match test f with
+  match test f ~backtrace ~callstack ~color with
   | Test_Result.Ok time ->
-    Format.sprintf
-      "   \027[32mo\027[0m- %s...\027[32mOK\027[0m \027[38m(%fs)\027[0m"
-      name
-      time
+    if color
+    then
+      Format.sprintf
+        "   \027[32mo\027[0m- %s...\027[32mOK\027[0m \027[38m(%fs)\027[0m"
+        name
+        time
+    else Format.sprintf "   o- %s...OK (%fs)" name time
   | Test_Result.Fail (i, b, c) ->
-    Format.sprintf
-      "   \027[31mo\027[0m- %s...\027[31mFAIL\027[0m \027[38m(0s)\027[0m\n\
-      \        \027[31m|!| %s\027[0m\n\
-      \        \027[4;36mBACKTRACES\027[0m %s\n\
-      \                   \027[37m|\027[0m\n\
-      \        \027[4;36mCALLSTACKS\027[0m %s"
-      name
-      i
-      b
-      c
+    if color
+    then
+      Format.sprintf
+        "   \027[31mo\027[0m- %s...\027[31mFAIL\027[0m \027[38m(0s)\027[0m\n\
+        \        \027[31m|!| %s\027[0m\n\
+         %s%s"
+        name
+        i
+        (if backtrace
+        then
+          Format.sprintf
+            "        \027[4;36mBACKTRACES\027[0m %s\n                   \027[37m\027[0m\n"
+            b
+        else "")
+        (if callstack
+        then Format.sprintf "                \027[4;36mCALLSTACKS\027[0m %s\n" c
+        else "")
+    else
+      Format.sprintf
+        "   o- %s...FAIL (0s)\n        |!| %s\n%s%s"
+        name
+        i
+        (if backtrace
+        then Format.sprintf "        BACKTRACES %s\n                   \n" b
+        else "")
+        (if callstack then Format.sprintf "                CALLSTACKS %s\n" c else "")
 ;;
 
-let test_suit (test_suit : 'a test_suit) : unit =
+let test_suit
+  ?(backtrace : bool = false)
+  ?(callstack : bool = false)
+  ?(color : bool = false)
+  (test_suit : test_suit)
+  : unit
+  =
   let name, test_case_list = test_suit in
   Format.sprintf "\027[35m|-\027[0m \027[38mTest suit for\027[0m \027[1;34m%s\027[0m" name
   |> print_endline;
-  List.iter (fun case -> test_case case |> print_endline) test_case_list
+  List.iter
+    (fun case -> test_case case ~backtrace ~callstack ~color |> print_endline)
+    test_case_list
 ;;
 
-(** start record backtrace *)
-let _ = Printexc.record_backtrace true
-
-let run = test_suit
+let run
+  ?(backtrace : bool = false)
+  ?(callstack : bool = false)
+  ?(color : bool = false)
+  (suit : test_suit)
+  =
+  if backtrace then Printexc.record_backtrace true;
+  let _ = test_suit ~backtrace ~callstack ~color suit in
+  ()
+;;
