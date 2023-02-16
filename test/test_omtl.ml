@@ -96,6 +96,19 @@ let _ =
 
 let _ =
   let open Omtl.Test in
+  "My_String with backtrace, callstack (without color)"
+  +:> [ "equal" >== test_equal
+      ; "capitalize" >== test_capitalize
+      ; "str_concat" >== test_str_concat
+      ; "Examples of test failures" >== test_failure
+      ; "Examples of undefined exception" >== test_undefined_exception
+      ; "Test function running time" >== test_function_running_time
+      ]
+  |> run ~callstack:true ~backtrace:true
+;;
+
+let _ =
+  let open Omtl.Test in
   "My_String with color (without backtrace, callstack)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
