@@ -22,7 +22,7 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-open Omtl.Utils
+open Omtl
 
 (* A module with functions to test *)
 module My_String = struct
@@ -56,7 +56,6 @@ let test_function_running_time () = Unix.sleep 1
 
 (* Run it *)
 let _ =
-  let open Omtl.Test in
   "My_String (without all)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -69,7 +68,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String with backtrace (without color, callstack)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -82,7 +80,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String with callstack (without color, backtrace)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -95,7 +92,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String with backtrace, callstack (without color)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -108,7 +104,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String with color (without backtrace, callstack)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -121,7 +116,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String with color, backtrace (without callstack)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -134,7 +128,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String with color, callstack (without backtrace)"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
@@ -147,7 +140,6 @@ let _ =
 ;;
 
 let _ =
-  let open Omtl.Test in
   "My_String withall"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize

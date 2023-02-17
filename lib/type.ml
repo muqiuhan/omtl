@@ -22,12 +22,16 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-open Test
+type test_suit = string * test_case list
+and test_case = string * (unit -> unit)
 
-(** Assist in building test sets and individual test items to improve the readability of test code *)
-let ( +:> ) (name : string) (test_case_list : test_case list) = name, test_case_list
+module Test_Result = struct
+  type t =
+    | Ok of time
+    | Fail of info * backtraces * callstack
 
-let ( >== ) (name : string) (f : unit -> unit) : test_case = name, f
-
-(** Wrapper function to failwith *)
-let fail = failwith
+  and time = float
+  and info = string
+  and callstack = string
+  and backtraces = string
+end
