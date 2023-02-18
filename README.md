@@ -25,8 +25,6 @@ This is not a comprehensive test framework, just a library, about a hundred line
 ## Usage
 [./test/test_omtl.ml](./test/test_omtl.ml)
 ```ocaml
-open Omtl
-
 (* A module with functions to test *)
 module My_String = struct
   let equal = String.equal
@@ -38,7 +36,7 @@ end
 let test_equal () =
   if My_String.equal "hello!" "hello!"
   then ()
-  else fail "My_String.equal \"hELLO!\" = \"hello!\""
+  else fail "My_String.equal \"hello!\" = \"hello!\""
 ;;
 
 let test_capitalize () =
@@ -57,9 +55,8 @@ let test_failure () = fail "Take it easy, this is just an example of a failed te
 let test_undefined_exception () = raise Not_found
 let test_function_running_time () = Unix.sleep 1
 
-(* Run it *)
 let _ =
-  "My_String"
+  "My_String withall"
   +:> [ "equal" >== test_equal
       ; "capitalize" >== test_capitalize
       ; "str_concat" >== test_str_concat
@@ -67,7 +64,7 @@ let _ =
       ; "Examples of undefined exception" >== test_undefined_exception
       ; "Test function running time" >== test_function_running_time
       ]
-  |> run
+  |> run ~color:true ~backtrace:true ~callstack:true
 ;;
 ```
 
