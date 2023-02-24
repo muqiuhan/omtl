@@ -46,50 +46,70 @@ functor
     ;;
   end
 
-module Backtrace : Info_API = Info_Generator ((
-  struct
-    let decorate (lst : string list) : string list =
-      match lst with
-      | [] -> []
-      | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
-    ;;
+module Get_Info = struct
+  module Backtrace = struct
+    let get_info () = Printexc.get_raw_backtrace () |> Printexc.raw_backtrace_to_string
+  end
 
-    (** Filter the backtrace related to the library itself *)
+  module CallStack = struct
+    let get_info () = Printexc.get_callstack 20 |> Printexc.raw_backtrace_to_string
+  end
+end
+
+module Filter = struct
+  module Backtrace = struct
     let filter =
       List.filter (fun s ->
         (not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
         && not (String.equal s ""))
     ;;
+  end
 
-    let get_info () = Printexc.get_raw_backtrace () |> Printexc.raw_backtrace_to_string
-  end :
-    Info_Impl))
-
-module CallStack : Info_API = Info_Generator ((
-  struct
-    (** Filter the first two CallStack information, because the first two are related to the library itself *)
+  module CallStack = struct
     let filter (lst : string list) : string list =
-      let rec loop (lst : string list) (index : int) : string list =
-        match lst with
-        | [] -> []
-        | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
-      in
-      loop (loop lst 2 |> List.rev) 1
+      let index = ref 8 in
+      let lst_len = List.length lst - !index in
+      lst
+      
+      |> List.filter (fun _ ->
+           index := !index + 1;
+           !index != lst_len)
     ;;
+  end
+end
+
+module Backtrace : Info_API = Info_Generator ((
+  struct
+    include Get_Info.Backtrace
+    include Filter.Backtrace
 
     let decorate (lst : string list) : string list =
       match lst with
       | [] -> []
       | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
     ;;
+  end :
+    Info_Impl))
 
-    let get_info () = Printexc.get_callstack 20 |> Printexc.raw_backtrace_to_string
+module CallStack : Info_API = Info_Generator ((
+  struct
+    include Get_Info.CallStack
+    include Filter.CallStack
+
+    let decorate (lst : string list) : string list =
+      match lst with
+      | [] -> []
+      | x :: xs -> ("| " ^ x) :: (List.map (fun x -> "                   | " ^ x)) xs
+    ;;
   end :
     Info_Impl))
 
 module Color = struct
   module Backtrace : Info_API = Info_Generator ((
     struct
+      include Get_Info.Backtrace
+      include Filter.Backtrace
+
       let decorate (lst : string list) : string list =
         match lst with
         | [] -> []
@@ -97,29 +117,13 @@ module Color = struct
           ("\027[33m| " ^ x ^ "\027[0m")
           :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
       ;;
-
-      (** Filter the backtrace related to the library itself *)
-      let filter =
-        List.filter (fun s ->
-          (not (String.starts_with ~prefix:"Called from Omtl.test.time" s))
-          && not (String.equal s ""))
-      ;;
-
-      let get_info () = Printexc.get_raw_backtrace () |> Printexc.raw_backtrace_to_string
     end :
       Info_Impl))
 
   module CallStack : Info_API = Info_Generator ((
     struct
-      (** Filter the first two CallStack information, because the first two are related to the library itself *)
-      let filter (lst : string list) : string list =
-        let rec loop (lst : string list) (index : int) : string list =
-          match lst with
-          | [] -> []
-          | x :: xs -> if index = 0 then x :: xs else loop xs (index - 1)
-        in
-        loop (loop lst 2 |> List.rev) 1
-      ;;
+      include Get_Info.CallStack
+      include Filter.CallStack
 
       let decorate (lst : string list) : string list =
         match lst with
@@ -128,8 +132,6 @@ module Color = struct
           ("\027[33m| " ^ x ^ "\027[0m")
           :: (List.map (fun x -> "                   \027[37m| " ^ x ^ "\027[0m")) xs
       ;;
-
-      let get_info () = Printexc.get_callstack 20 |> Printexc.raw_backtrace_to_string
     end :
       Info_Impl))
 end

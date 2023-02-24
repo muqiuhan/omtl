@@ -50,95 +50,11 @@ let test_str_concat () =
   else fail "My_String.str_concat [\"foo\"; \"bar\"] = \"foobar\""
 ;;
 
-let test_failure () = fail "Take it easy, this is just an example of a failed test"
+let test_failure () = failwith "Take it easy, this is just an example of a failed test"
 let test_undefined_exception () = raise Not_found
 let test_function_running_time () = Unix.sleep 1
 
 (* Run it *)
-let _ =
-  "My_String (without all)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run
-;;
-
-let _ =
-  "My_String with backtrace (without color, callstack)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run ~backtrace:true
-;;
-
-let _ =
-  "My_String with callstack (without color, backtrace)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run ~callstack:true
-;;
-
-let _ =
-  "My_String with backtrace, callstack (without color)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run ~callstack:true ~backtrace:true
-;;
-
-let _ =
-  "My_String with color (without backtrace, callstack)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run ~color:true
-;;
-
-let _ =
-  "My_String with color, backtrace (without callstack)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run ~color:true ~backtrace:true
-;;
-
-let _ =
-  "My_String with color, callstack (without backtrace)"
-  +:> [ "equal" >== test_equal
-      ; "capitalize" >== test_capitalize
-      ; "str_concat" >== test_str_concat
-      ; "Examples of test failures" >== test_failure
-      ; "Examples of undefined exception" >== test_undefined_exception
-      ; "Test function running time" >== test_function_running_time
-      ]
-  |> run ~color:true ~callstack:true
-;;
-
 let _ =
   "My_String withall"
   +:> [ "equal" >== test_equal
